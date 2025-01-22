@@ -66,6 +66,9 @@ class Message extends Model implements Ownerable
         QueryCacheable,
         Uuids;
 
+
+    public $cacheFor = 3600;
+
     const MESSAGE = 0;
     const IMAGE_MESSAGE = 1;
     const DOCUMENT_MESSAGE = 2;
@@ -124,7 +127,6 @@ class Message extends Model implements Ownerable
      * @var string
      */
     protected $table = 'messages';
-    public $cacheFor = 3600;
 
     /**
      * The storage format of the model's date columns.
@@ -337,6 +339,14 @@ class Message extends Model implements Ownerable
     public function getAudioPath(): string
     {
         return "{$this->getStorageDirectory()}/audio/$this->body";
+    }
+
+    public function getBodyAttribute($value)
+    {
+        if ($this->type != self::MESSAGE) {
+            return $this->generatePresignedUrl($value);
+        }
+        return $value;
     }
 
     /**
@@ -587,16 +597,6 @@ class Message extends Model implements Ownerable
      * @return string
      */
 
-    //  public function getBodyAttribute($value)
-    //  {
-    //      if ($this->type != 0) {
-    //         \Log::info($this->generatePresignedUrl($value));
-    //          return $this->generatePresignedUrl($value);
-    //      }
-
-    //      return $value;
-    //  }
-
     /**
      * Get the full URL for the message body.
      *
@@ -611,38 +611,4 @@ class Message extends Model implements Ownerable
       * @param  string  $filePath
       * @return string
       */
-     public function generatePresignedUrl($filePath)
-     {
-         try {
-            $disk = Storage::disk('Wasabi');
-
-        $client = new S3Client([
-            'region'  => config('filesystems.disks.Wasabi.region'), // Wasabi region
-            'version' => 'latest',
-            'endpoint' => config('filesystems.disks.Wasabi.endpoint'), // Wasabi endpoint
-            'credentials' => [
-                'key'    => '9H2VZ1MVNOXLSOU04YVU',
-                'secret' => 'eiZChN9zkgfSiqi4OVcnnoI0YnlGDAH88ECC0F0p',
-            ],
-        ]);
-
-        $cmd = $client->getCommand('GetObject', [
-            'Bucket' => config('filesystems.disks.Wasabi.bucket'),
-            'Key'    => $filePath
-        ]);
-
-        $request = $client->createPresignedRequest($cmd, '+30 minutes');
-        return (string) $request->getUri();
-
-
-
-
-         } catch (AwsException $e) {
-             // Handle any errors (e.g., permission issues, etc.)
-             return response()->json(['error' => $e->getMessage()], 400);
-         }
-     }
-
-
-
 }
