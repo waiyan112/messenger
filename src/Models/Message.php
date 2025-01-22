@@ -297,7 +297,7 @@ class Message extends Model implements Ownerable
         return Cache::remember(
             self::getReplyMessageCacheKey($this->reply_to_id),
             now()->addWeek(),
-            fn () => optional($this->replyTo)->load('owner')
+            fn() => optional($this->replyTo)->load('owner')
         );
     }
 
@@ -314,7 +314,7 @@ class Message extends Model implements Ownerable
      */
     public function getStorageDirectory(): string
     {
-        return Messenger::getThreadStorage('directory')."/$this->thread_id";
+        return Messenger::getThreadStorage('directory') . "/$this->thread_id";
     }
 
     /**
@@ -349,6 +349,38 @@ class Message extends Model implements Ownerable
         return $value;
     }
 
+    public function generatePresignedUrl($filePath)
+    {
+        try {
+            $disk = Storage::disk('Wasabi');
+
+            $client = new S3Client([
+                'region' => config('filesystems.disks.Wasabi.region'), // Wasabi region
+                'version' => 'latest',
+                'endpoint' => config('filesystems.disks.Wasabi.endpoint'), // Wasabi endpoint
+                'credentials' => [
+                    'key' => '9H2VZ1MVNOXLSOU04YVU',
+                    'secret' => 'eiZChN9zkgfSiqi4OVcnnoI0YnlGDAH88ECC0F0p',
+                ],
+            ]);
+
+            $cmd = $client->getCommand('GetObject', [
+                'Bucket' => config('filesystems.disks.Wasabi.bucket'),
+                'Key' => $filePath
+            ]);
+
+            $request = $client->createPresignedRequest($cmd, '+30 minutes');
+            return (string) $request->getUri();
+
+
+
+
+        } catch (AwsException $e) {
+            // Handle any errors (e.g., permission issues, etc.)
+            return response()->json(['error' => $e->getMessage()], 400);
+        }
+    }
+
     /**
      * @return string
      */
@@ -371,11 +403,12 @@ class Message extends Model implements Ownerable
      */
     public function getImageViewRoute(string $size = 'sm'): ?string
     {
-        if (! $this->isImage()) {
+        if (!$this->isImage()) {
             return null;
         }
 
-        return Helpers::route('assets.messenger.threads.gallery.render',
+        return Helpers::route(
+            'assets.messenger.threads.gallery.render',
             [
                 'thread' => $this->thread_id,
                 'message' => $this->id,
@@ -390,11 +423,12 @@ class Message extends Model implements Ownerable
      */
     public function getDocumentDownloadRoute(): ?string
     {
-        if (! $this->isDocument()) {
+        if (!$this->isDocument()) {
             return null;
         }
 
-        return Helpers::route('assets.messenger.threads.files.download',
+        return Helpers::route(
+            'assets.messenger.threads.files.download',
             [
                 'thread' => $this->thread_id,
                 'message' => $this->id,
@@ -408,11 +442,12 @@ class Message extends Model implements Ownerable
      */
     public function getAudioDownloadRoute(): ?string
     {
-        if (! $this->isAudio()) {
+        if (!$this->isAudio()) {
             return null;
         }
 
-        return Helpers::route('assets.messenger.threads.audio.download',
+        return Helpers::route(
+            'assets.messenger.threads.audio.download',
             [
                 'thread' => $this->thread_id,
                 'message' => $this->id,
@@ -426,11 +461,12 @@ class Message extends Model implements Ownerable
      */
     public function getVideoDownloadRoute(): ?string
     {
-        if (! $this->isVideo()) {
+        if (!$this->isVideo()) {
             return null;
         }
 
-        return Helpers::route('assets.messenger.threads.videos.download',
+        return Helpers::route(
+            'assets.messenger.threads.videos.download',
             [
                 'thread' => $this->thread_id,
                 'message' => $this->id,
@@ -444,11 +480,12 @@ class Message extends Model implements Ownerable
      */
     public function getEditHistoryRoute(): ?string
     {
-        if (! $this->isEdited()) {
+        if (!$this->isEdited()) {
             return null;
         }
 
-        return Helpers::route('api.messenger.threads.messages.history',
+        return Helpers::route(
+            'api.messenger.threads.messages.history',
             [
                 'thread' => $this->thread_id,
                 'message' => $this->id,
@@ -469,7 +506,7 @@ class Message extends Model implements Ownerable
      */
     public function notFromBot(): bool
     {
-        return ! $this->isFromBot();
+        return !$this->isFromBot();
     }
 
     /**
@@ -509,7 +546,7 @@ class Message extends Model implements Ownerable
      */
     public function isSystemMessage(): bool
     {
-        return ! in_array($this->type, self::NonSystemTypes);
+        return !in_array($this->type, self::NonSystemTypes);
     }
 
 
@@ -518,7 +555,7 @@ class Message extends Model implements Ownerable
      */
     public function notSystemMessage(): bool
     {
-        return ! $this->isSystemMessage();
+        return !$this->isSystemMessage();
     }
 
     /**
@@ -558,7 +595,7 @@ class Message extends Model implements Ownerable
      */
     public function hasTemporaryId(): bool
     {
-        return ! is_null($this->temporaryId);
+        return !is_null($this->temporaryId);
     }
 
     /**
@@ -590,7 +627,7 @@ class Message extends Model implements Ownerable
         return MessageFactory::new();
     }
 
-        /**
+    /**
      * Get the body attribute.
      *
      * @param  string  $value
@@ -605,10 +642,10 @@ class Message extends Model implements Ownerable
 
 
 
-     /**
-      * Generate a presigned URL for the given file path.
-      *
-      * @param  string  $filePath
-      * @return string
-      */
+    /**
+     * Generate a presigned URL for the given file path.
+     *
+     * @param  string  $filePath
+     * @return string
+     */
 }
