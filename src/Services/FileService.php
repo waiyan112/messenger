@@ -242,8 +242,6 @@ class FileService
      */
     public function getUrl(string $path): string
     {
-        \Log::info('Generating temporary URL for path: ' . $path);
-        // Return a temporary URL instead of the default public URL
         return $this->temporaryUrl($path, 300 * 24); // Default: 5 days
     }
 
