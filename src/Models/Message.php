@@ -343,9 +343,6 @@ class Message extends Model implements Ownerable
 
     public function getBodyAttribute($value)
     {
-        if ($this->type != self::MESSAGE) {
-            return $this->generatePresignedUrl($value);
-        }
         return $value;
     }
 
@@ -386,7 +383,8 @@ class Message extends Model implements Ownerable
      */
     public function getVideoPath(): string
     {
-        return "{$this->getStorageDirectory()}/videos/$this->body";
+        $path = "$this->thread_id/videos/$this->body";
+        return $this->generatePresignedUrl($path);
     }
 
     /**
@@ -403,19 +401,8 @@ class Message extends Model implements Ownerable
      */
     public function getImageViewRoute(string $size = 'sm'): ?string
     {
-        if (!$this->isImage()) {
-            return null;
-        }
-
-        return Helpers::route(
-            'assets.messenger.threads.gallery.render',
-            [
-                'thread' => $this->thread_id,
-                'message' => $this->id,
-                'size' => $size,
-                'image' => $this->body,
-            ]
-        );
+        $path = "$this->thread_id/images/$this->body";
+        return $this->generatePresignedUrl($path);
     }
 
     /**
@@ -427,14 +414,8 @@ class Message extends Model implements Ownerable
             return null;
         }
 
-        return Helpers::route(
-            'assets.messenger.threads.files.download',
-            [
-                'thread' => $this->thread_id,
-                'message' => $this->id,
-                'file' => $this->body,
-            ]
-        );
+        $path = "$this->thread_id/document/$this->body";
+        return $this->generatePresignedUrl($path);
     }
 
     /**
@@ -442,18 +423,8 @@ class Message extends Model implements Ownerable
      */
     public function getAudioDownloadRoute(): ?string
     {
-        if (!$this->isAudio()) {
-            return null;
-        }
-
-        return Helpers::route(
-            'assets.messenger.threads.audio.download',
-            [
-                'thread' => $this->thread_id,
-                'message' => $this->id,
-                'audio' => $this->body,
-            ]
-        );
+        $path = "$this->thread_id/audios/$this->body";
+        return $this->generatePresignedUrl($path);
     }
 
     /**
@@ -461,18 +432,8 @@ class Message extends Model implements Ownerable
      */
     public function getVideoDownloadRoute(): ?string
     {
-        if (!$this->isVideo()) {
-            return null;
-        }
-
-        return Helpers::route(
-            'assets.messenger.threads.videos.download',
-            [
-                'thread' => $this->thread_id,
-                'message' => $this->id,
-                'video' => $this->body,
-            ]
-        );
+        $path = "$this->thread_id/videos/$this->body";
+        return $this->generatePresignedUrl($path);
     }
 
     /**
