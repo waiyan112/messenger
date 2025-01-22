@@ -7,7 +7,7 @@ use Illuminate\Auth\Access\Response;
 use RTippin\Messenger\Messenger;
 use RTippin\Messenger\Models\Message;
 use RTippin\Messenger\Models\Thread;
-
+use Log;
 
 class MessagePolicy
 {
@@ -84,14 +84,12 @@ class MessagePolicy
      * @param  Thread  $thread
      * @return Response
      */
-    public function create($user, Thread $thread): Response
+    public function create($user, $thread = null): Response
     {
-        // Log::info($thread);
-        // Log::info($user);
+        return $this->allow();
         // return $thread->canMessage()
         //     ? $this->allow()
         //     : $this->deny('Not authorized to send messages.');
-        return $this->allow();
     }
 
     /**
