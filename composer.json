@@ -1,12 +1,12 @@
 {
-    "name": "kowayan/customize_for_rtippin_messenger",
+    "name": "kowaiyan/messenger",
     "description": "Laravel messenger suite.",
     "license": "MIT",
     "authors": [
         {
-            "name": "Richard Tippin",
-            "email": "tippindev@gmail.com",
-            "homepage": "https://tippindev.com"
+            "name": "Ko WaiYan",
+            "email": "waiyan@gmail.com",
+            "homepage": "https://waiyanln.com"
         }
     ],
     "homepage": "https://github.com/rtippin/messenger",
