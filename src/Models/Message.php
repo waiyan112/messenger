@@ -414,7 +414,7 @@ class Message extends Model implements Ownerable
             return null;
         }
 
-        $path = "threads/$this->thread_id/document/$this->body";
+        $path = "threads/$this->thread_id/documents/$this->body";
         return $this->generatePresignedUrl($path);
     }
 
