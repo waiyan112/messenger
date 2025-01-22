@@ -67,23 +67,23 @@ class ThreadResource extends JsonResource
             'unread_count' => $this->thread->unreadCount(),
             'created_at' => $this->thread->created_at,
             'updated_at' => $this->thread->updated_at,
-            'options' => [
-                'admin' => $this->thread->isAdmin(),
-                'manage_bots' => $this->thread->canManageBots(),
-                'chat_bots' => $this->thread->hasBotsFeature(),
-                'muted' => $this->thread->isMuted(),
-                'add_participants' => $this->thread->canAddParticipants(),
-                'invitations' => $this->thread->canInviteParticipants(),
-                'call' => $this->thread->canCall(),
-                'message' => $this->thread->canMessage(),
-                'knock' => $this->thread->canKnock(),
-                'awaiting_my_approval' => $this->when($this->thread->isPending(),
-                    fn () => $this->thread->isAwaitingMyApproval()
-                ),
-            ],
-            'system_features' => $this->when($this->addSystemFeatures,
-                fn () => Messenger::getSystemFeatures()
-            ),
+            // 'options' => [
+            //     'admin' => $this->thread->isAdmin(),
+            //     'manage_bots' => $this->thread->canManageBots(),
+            //     'chat_bots' => $this->thread->hasBotsFeature(),
+            //     'muted' => $this->thread->isMuted(),
+            //     'add_participants' => $this->thread->canAddParticipants(),
+            //     'invitations' => $this->thread->canInviteParticipants(),
+            //     'call' => $this->thread->canCall(),
+            //     'message' => $this->thread->canMessage(),
+            //     'knock' => $this->thread->canKnock(),
+            //     'awaiting_my_approval' => $this->when($this->thread->isPending(),
+            //         fn () => $this->thread->isAwaitingMyApproval()
+            //     ),
+            // ],
+            // 'system_features' => $this->when($this->addSystemFeatures,
+            //     fn () => Messenger::getSystemFeatures()
+            // ),
             'resources' => [
                 'recipient' => $this->when($this->thread->isPrivate(),
                     fn () => $this->addRecipient()
@@ -91,9 +91,9 @@ class ThreadResource extends JsonResource
                 'active_call' => $this->when($this->thread->hasActiveCall(),
                     fn () => $this->addActiveCall()
                 ),
-                'participants' => $this->when($this->addResources,
-                    fn () => $this->addParticipants()
-                ),
+                // 'participants' => $this->when($this->addResources,
+                //     fn () => $this->addParticipants()
+                // ),
                 'messages' => $this->when($this->addResources,
                     fn () => $this->addMessages()
                 ),
