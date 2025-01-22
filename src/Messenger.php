@@ -107,6 +107,8 @@ final class Messenger
         return (bool) $this->findProviderAlias($provider);
     }
 
+
+
     /**
      * Get the defined alias of the provider class defined in config.
      *

@@ -20,6 +20,10 @@ use RTippin\Messenger\Support\Helpers;
 use RTippin\Messenger\Traits\HasOwner;
 use RTippin\Messenger\Traits\ScopesProvider;
 use RTippin\Messenger\Traits\Uuids;
+use Aws\S3\S3Client;
+use Illuminate\Support\Facades\Storage;
+use Aws\Exception\AwsException;
+use Rennokki\QueryCache\Traits\QueryCacheable;
 
 /**
  * @mixin Model|\Eloquent
@@ -59,6 +63,7 @@ class Message extends Model implements Ownerable
         HasOwner,
         ScopesProvider,
         SoftDeletes,
+        QueryCacheable,
         Uuids;
 
     const MESSAGE = 0;
@@ -119,6 +124,7 @@ class Message extends Model implements Ownerable
      * @var string
      */
     protected $table = 'messages';
+    public $cacheFor = 3600;
 
     /**
      * The storage format of the model's date columns.
@@ -167,6 +173,8 @@ class Message extends Model implements Ownerable
         return $this->belongsTo(Thread::class);
     }
 
+
+
     /**
      * @return HasMany|MessageEdit|Collection
      */
@@ -182,6 +190,7 @@ class Message extends Model implements Ownerable
     {
         return $this->hasMany(MessageReaction::class);
     }
+
 
     /**
      * @return HasOne
@@ -205,6 +214,8 @@ class Message extends Model implements Ownerable
     {
         return $query->where('type', '=', self::MESSAGE);
     }
+
+
 
     /**
      * Scope a query for anything but system messages.
@@ -491,6 +502,7 @@ class Message extends Model implements Ownerable
         return ! in_array($this->type, self::NonSystemTypes);
     }
 
+
     /**
      * @return bool
      */
@@ -567,4 +579,70 @@ class Message extends Model implements Ownerable
     {
         return MessageFactory::new();
     }
+
+        /**
+     * Get the body attribute.
+     *
+     * @param  string  $value
+     * @return string
+     */
+
+    //  public function getBodyAttribute($value)
+    //  {
+    //      if ($this->type != 0) {
+    //         \Log::info($this->generatePresignedUrl($value));
+    //          return $this->generatePresignedUrl($value);
+    //      }
+
+    //      return $value;
+    //  }
+
+    /**
+     * Get the full URL for the message body.
+     *
+     * @return string
+     */
+
+
+
+     /**
+      * Generate a presigned URL for the given file path.
+      *
+      * @param  string  $filePath
+      * @return string
+      */
+     public function generatePresignedUrl($filePath)
+     {
+         try {
+            $disk = Storage::disk('Wasabi');
+
+        $client = new S3Client([
+            'region'  => config('filesystems.disks.Wasabi.region'), // Wasabi region
+            'version' => 'latest',
+            'endpoint' => config('filesystems.disks.Wasabi.endpoint'), // Wasabi endpoint
+            'credentials' => [
+                'key'    => '9H2VZ1MVNOXLSOU04YVU',
+                'secret' => 'eiZChN9zkgfSiqi4OVcnnoI0YnlGDAH88ECC0F0p',
+            ],
+        ]);
+
+        $cmd = $client->getCommand('GetObject', [
+            'Bucket' => config('filesystems.disks.Wasabi.bucket'),
+            'Key'    => $filePath
+        ]);
+
+        $request = $client->createPresignedRequest($cmd, '+30 minutes');
+        return (string) $request->getUri();
+
+
+
+
+         } catch (AwsException $e) {
+             // Handle any errors (e.g., permission issues, etc.)
+             return response()->json(['error' => $e->getMessage()], 400);
+         }
+     }
+
+
+
 }

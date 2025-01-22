@@ -19,7 +19,8 @@
         "ext-json": "*",
         "intervention/image": "^2.5",
         "joypixels/emoji-toolkit": "^6.0",
-        "laravel/framework": "^11.0"
+        "laravel/framework": "^11.0",
+        "rennokki/laravel-eloquent-query-cache": "^3.5"
     },
     "require-dev": {
         "phpunit/phpunit": "^10.0",

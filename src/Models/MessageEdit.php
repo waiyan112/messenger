@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 use RTippin\Messenger\Database\Factories\MessageEditFactory;
 use RTippin\Messenger\Traits\Uuids;
+use Rennokki\QueryCache\Traits\QueryCacheable;
 
 /**
  * @mixin Model|\Eloquent
@@ -24,6 +25,7 @@ use RTippin\Messenger\Traits\Uuids;
 class MessageEdit extends Model
 {
     use HasFactory,
+    QueryCacheable,
         Uuids;
 
     /**
@@ -32,6 +34,7 @@ class MessageEdit extends Model
      * @var string
      */
     protected $table = 'message_edits';
+    public $cacheFor = 3600;
 
     /**
      * The storage format of the model's date columns.

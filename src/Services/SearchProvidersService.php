@@ -55,7 +55,7 @@ class SearchProvidersService
      */
     public function enableSearchAllProviders(): self
     {
-        $this->onlySearchableForProvider = false;
+        $this->onlySearchableForProvider = true;
 
         return $this;
     }

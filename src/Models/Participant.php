@@ -18,6 +18,7 @@ use RTippin\Messenger\Support\Helpers;
 use RTippin\Messenger\Traits\HasOwner;
 use RTippin\Messenger\Traits\ScopesProvider;
 use RTippin\Messenger\Traits\Uuids;
+use Rennokki\QueryCache\Traits\QueryCacheable;
 
 /**
  * @mixin Model|\Eloquent
@@ -56,6 +57,7 @@ class Participant extends Model implements Ownerable
         HasOwner,
         ScopesProvider,
         SoftDeletes,
+        QueryCacheable,
         Uuids;
 
     const DefaultPermissions = [
@@ -87,6 +89,7 @@ class Participant extends Model implements Ownerable
      * @var string
      */
     protected $table = 'participants';
+    public $cacheFor = 3600;
 
     /**
      * The storage format of the model's date columns.

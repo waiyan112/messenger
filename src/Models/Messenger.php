@@ -13,6 +13,7 @@ use RTippin\Messenger\Database\Factories\MessengerFactory;
 use RTippin\Messenger\Traits\HasOwner;
 use RTippin\Messenger\Traits\ScopesProvider;
 use RTippin\Messenger\Traits\Uuids;
+use Rennokki\QueryCache\Traits\QueryCacheable;
 
 /**
  * @mixin Model|\Eloquent
@@ -36,6 +37,7 @@ class Messenger extends Model implements Ownerable
     use HasFactory,
         HasOwner,
         ScopesProvider,
+        QueryCacheable,
         Uuids;
 
     /**
@@ -44,6 +46,7 @@ class Messenger extends Model implements Ownerable
      * @var string
      */
     protected $table = 'messengers';
+    public $cacheFor = 3600;
 
     /**
      * The model's default values for attributes.

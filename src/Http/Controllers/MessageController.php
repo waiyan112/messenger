@@ -35,10 +35,10 @@ class MessageController
      */
     public function index(MessageRepository $repository, Thread $thread): MessageCollection
     {
-        $this->authorize('viewAny', [
-            Message::class,
-            $thread,
-        ]);
+        // $this->authorize('viewAny', [
+        //     app(Message::class),,
+        //     $thread,
+        // ]);
 
         return new MessageCollection(
             $repository->getThreadMessagesIndex($thread),
@@ -88,7 +88,7 @@ class MessageController
                           Thread $thread): MessageResource
     {
         $this->authorize('create', [
-            Message::class,
+            app(Message::class),
             $thread,
         ]);
 

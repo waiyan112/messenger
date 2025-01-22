@@ -21,7 +21,7 @@ use RTippin\Messenger\Messenger;
 use RTippin\Messenger\Support\Helpers;
 use RTippin\Messenger\Traits\HasOwner;
 use RTippin\Messenger\Traits\ScopesProvider;
-
+use Rennokki\QueryCache\Traits\QueryCacheable;
 /**
  * @mixin Model|\Eloquent
  *
@@ -47,7 +47,10 @@ class Bot extends Model implements MessengerProvider, Ownerable
     use HasFactory,
         HasOwner,
         ScopesProvider,
+        QueryCacheable,
         SoftDeletes;
+
+    public $cacheFor = 3600;
 
     /**
      * Create a new Eloquent model instance.

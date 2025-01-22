@@ -4,6 +4,7 @@ namespace RTippin\Messenger\Services;
 
 use Illuminate\Filesystem\FilesystemManager;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use RTippin\Messenger\Exceptions\FileServiceException;
 
@@ -119,7 +120,7 @@ class FileService
         $name = $this->nameFile($file);
 
         if (! $this->storeFile($file, $name)) {
-            $this->throwFileServiceException('File failed to upload.');
+            $this->throwFileServiceException('File failed to upload1.');
         }
 
         $this->reset();
@@ -230,5 +231,41 @@ class FileService
         $this->disk = null;
         $this->directory = null;
         $this->name = null;
+    }
+
+    /**
+     * Generate temporary URL for private files.
+     *
+     * @param string $path
+     * @param int $minutes
+     * @return string
+     */
+    public function getUrl(string $path): string
+    {
+        \Log::info('Generating temporary URL for path: ' . $path);
+        // Return a temporary URL instead of the default public URL
+        return $this->temporaryUrl($path, 300 * 24); // Default: 5 days
+    }
+
+    /**
+     * Generate a temporary URL for the given path.
+     *
+     * @param string $path
+     * @param int $minutes
+     * @return string
+     */
+    public function temporaryUrl(string $path, int $minutes = 300 * 24): string
+    {
+        return Storage::disk($this->getDisk())->temporaryUrl($path, now()->addMinutes($minutes));
+    }
+
+    /**
+     * Get the configured disk from Messenger config.
+     *
+     * @return string
+     */
+    protected function getDisk(): string
+    {
+        return config('messenger.filesystem_disk', 's3');
     }
 }
