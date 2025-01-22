@@ -383,7 +383,7 @@ class Message extends Model implements Ownerable
      */
     public function getVideoPath(): string
     {
-        $path = "$this->thread_id/videos/$this->body";
+        $path = "threads/$this->thread_id/videos/$this->body";
         return $this->generatePresignedUrl($path);
     }
 
@@ -401,7 +401,7 @@ class Message extends Model implements Ownerable
      */
     public function getImageViewRoute(string $size = 'sm'): ?string
     {
-        $path = "$this->thread_id/images/$this->body";
+        $path = "threads/$this->thread_id/images/$this->body";
         return $this->generatePresignedUrl($path);
     }
 
@@ -414,7 +414,7 @@ class Message extends Model implements Ownerable
             return null;
         }
 
-        $path = "$this->thread_id/document/$this->body";
+        $path = "threads/$this->thread_id/document/$this->body";
         return $this->generatePresignedUrl($path);
     }
 
@@ -423,7 +423,7 @@ class Message extends Model implements Ownerable
      */
     public function getAudioDownloadRoute(): ?string
     {
-        $path = "$this->thread_id/audios/$this->body";
+        $path = "threads/$this->thread_id/audios/$this->body";
         return $this->generatePresignedUrl($path);
     }
 
@@ -432,7 +432,7 @@ class Message extends Model implements Ownerable
      */
     public function getVideoDownloadRoute(): ?string
     {
-        $path = "$this->thread_id/videos/$this->body";
+        $path = "threads/$this->thread_id/videos/$this->body";
         return $this->generatePresignedUrl($path);
     }
 
