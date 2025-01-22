@@ -14,6 +14,7 @@ use RTippin\Messenger\Facades\Messenger;
 use RTippin\Messenger\Traits\HasOwner;
 use RTippin\Messenger\Traits\ScopesProvider;
 use RTippin\Messenger\Traits\Uuids;
+use Rennokki\QueryCache\Traits\QueryCacheable;
 
 /**
  * @mixin Model|\Eloquent
@@ -32,12 +33,14 @@ class Friend extends Model implements Ownerable
     use HasFactory,
         HasOwner,
         ScopesProvider,
+        QueryCacheable,
         Uuids;
 
     /**
      * @var string
      */
     protected $table = 'friends';
+    public $cacheFor = 3600;
 
     /**
      * @var array

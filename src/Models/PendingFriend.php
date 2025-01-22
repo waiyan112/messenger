@@ -12,6 +12,9 @@ use RTippin\Messenger\Database\Factories\PendingFriendFactory;
 use RTippin\Messenger\Facades\Messenger;
 use RTippin\Messenger\Traits\ScopesProvider;
 use RTippin\Messenger\Traits\Uuids;
+use Rennokki\QueryCache\Traits\QueryCacheable;
+
+
 
 /**
  * @mixin Model|\Eloquent
@@ -32,13 +35,14 @@ class PendingFriend extends Model
 {
     use HasFactory,
         ScopesProvider,
+        QueryCacheable,
         Uuids;
 
     /**
      * @var string
      */
     protected $table = 'pending_friends';
-
+    public $cacheFor = 3600;
     /**
      * @var array
      */

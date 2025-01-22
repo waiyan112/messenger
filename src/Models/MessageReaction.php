@@ -13,6 +13,9 @@ use RTippin\Messenger\Database\Factories\MessageReactionFactory;
 use RTippin\Messenger\Traits\HasOwner;
 use RTippin\Messenger\Traits\ScopesProvider;
 use RTippin\Messenger\Traits\Uuids;
+use Rennokki\QueryCache\Traits\QueryCacheable;
+
+
 
 /**
  * @mixin Model|\Eloquent
@@ -32,6 +35,7 @@ class MessageReaction extends Model implements Ownerable
     use HasFactory,
         HasOwner,
         Uuids,
+        QueryCacheable,
         ScopesProvider;
 
     /**
@@ -40,7 +44,7 @@ class MessageReaction extends Model implements Ownerable
      * @var string
      */
     protected $table = 'message_reactions';
-
+    public $cacheFor = 3600;
     /**
      * The storage format of the model's date columns.
      *

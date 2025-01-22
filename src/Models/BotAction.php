@@ -17,6 +17,7 @@ use RTippin\Messenger\Facades\MessengerBots;
 use RTippin\Messenger\Support\BotActionHandler;
 use RTippin\Messenger\Traits\HasOwner;
 use RTippin\Messenger\Traits\Uuids;
+use Rennokki\QueryCache\Traits\QueryCacheable;
 
 /**
  * @mixin Model|\Eloquent
@@ -46,6 +47,7 @@ class BotAction extends Model implements Ownerable
 {
     use HasFactory,
         HasOwner,
+        QueryCacheable,
         Uuids;
 
     /**
@@ -54,7 +56,7 @@ class BotAction extends Model implements Ownerable
      * @var string
      */
     protected $table = 'bot_actions';
-
+    public $cacheFor = 3600;
     /**
      * The attributes that can be set with Mass Assignment.
      *

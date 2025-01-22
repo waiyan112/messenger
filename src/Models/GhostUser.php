@@ -6,13 +6,17 @@ use Illuminate\Database\Eloquent\Model;
 use RTippin\Messenger\Contracts\MessengerProvider;
 use RTippin\Messenger\Messenger;
 use RTippin\Messenger\Support\Helpers;
+use Rennokki\QueryCache\Traits\QueryCacheable;
+
 
 class GhostUser extends Model
 {
+    use QueryCacheable;
     /**
      * @var array
      */
     protected $guarded = [];
+    public $cacheFor = 3600;
 
     /**
      * @var string

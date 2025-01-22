@@ -14,6 +14,9 @@ use RTippin\Messenger\Database\Factories\CallParticipantFactory;
 use RTippin\Messenger\Traits\HasOwner;
 use RTippin\Messenger\Traits\ScopesProvider;
 use RTippin\Messenger\Traits\Uuids;
+use Rennokki\QueryCache\Traits\QueryCacheable;
+
+
 
 /**
  * @mixin Model|\Eloquent
@@ -35,6 +38,7 @@ class CallParticipant extends Model implements Ownerable
     use HasFactory,
         HasOwner,
         ScopesProvider,
+        QueryCacheable,
         Uuids;
 
     /**
@@ -43,7 +47,7 @@ class CallParticipant extends Model implements Ownerable
      * @var string
      */
     protected $table = 'call_participants';
-
+    public $cacheFor = 3600;
     /**
      * @var array
      */

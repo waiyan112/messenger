@@ -15,6 +15,7 @@ use RTippin\Messenger\Support\Helpers;
 use RTippin\Messenger\Traits\HasOwner;
 use RTippin\Messenger\Traits\ScopesProvider;
 use RTippin\Messenger\Traits\Uuids;
+use Rennokki\QueryCache\Traits\QueryCacheable;
 
 /**
  * @mixin Model|\Eloquent
@@ -44,13 +45,14 @@ class Invite extends Model implements Ownerable
         HasOwner,
         ScopesProvider,
         SoftDeletes,
+        QueryCacheable,
         Uuids;
 
     /**
      * @var string
      */
     protected $table = 'thread_invites';
-
+    public $cacheFor = 3600;
     /**
      * The attributes that can be set with Mass Assignment.
      *
