@@ -423,7 +423,7 @@ class Message extends Model implements Ownerable
      */
     public function getAudioDownloadRoute(): ?string
     {
-        $path = "threads/$this->thread_id/audios/$this->body";
+        $path = "threads/$this->thread_id/audio/$this->body";
         return $this->generatePresignedUrl($path);
     }
 
