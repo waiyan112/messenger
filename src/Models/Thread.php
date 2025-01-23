@@ -512,9 +512,9 @@ class Thread extends Model implements HasPresenceChannel
         }
 
         return [
-            'sm' => $this->getThreadAvatarRoute(),
-            'md' => $this->getThreadAvatarRoute('md'),
-            'lg' => $this->getThreadAvatarRoute('lg'),
+            'sm' => 'https://gravatar.com/avatar/7047eabc6b127aa363e66adcea596bbe?s=400&d=robohash&r=x' ,//$this->getThreadAvatarRoute(),
+            'md' => 'https://gravatar.com/avatar/7047eabc6b127aa363e66adcea596bbe?s=400&d=robohash&r=x',//$this->getThreadAvatarRoute('md'),
+            'lg' => 'https://gravatar.com/avatar/7047eabc6b127aa363e66adcea596bbe?s=400&d=robohash&r=x'//$this->getThreadAvatarRoute('lg'),
         ];
     }
 
