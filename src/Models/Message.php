@@ -23,7 +23,7 @@ use RTippin\Messenger\Traits\Uuids;
 use Aws\S3\S3Client;
 use Illuminate\Support\Facades\Storage;
 use Aws\Exception\AwsException;
-use Rennokki\QueryCache\Traits\QueryCacheable;
+
 
 /**
  * @mixin Model|\Eloquent
@@ -63,11 +63,10 @@ class Message extends Model implements Ownerable
         HasOwner,
         ScopesProvider,
         SoftDeletes,
-        QueryCacheable,
         Uuids;
 
 
-    public $cacheFor = 3600;
+
 
     const MESSAGE = 0;
     const IMAGE_MESSAGE = 1;
