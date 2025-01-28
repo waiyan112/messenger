@@ -91,7 +91,6 @@ class MessageController
             app(Message::class),
             $thread,
         ]);
-        return 'success';
 
         return $storeMessage->execute(
             $thread,
