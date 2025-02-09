@@ -340,10 +340,33 @@ class Message extends Model implements Ownerable
         return "{$this->getStorageDirectory()}/audio/$this->body";
     }
 
+
+
     public function getBodyAttribute($value)
-    {
+    {        
+        if(env('translatefeature') == 1){
+            $finaltext = '';
+            
+            if($this->type == 0 && $value !="Deleted Message"){
+                $tran =  new \App\Services\OpenAIService();
+                  $language = $tran->detectLanguage($value);
+                  if($language == 'Japanese'){
+                    $finaltext .= $value ." \n ";
+                      $value = $tran->translateText($value,"English");
+                      $finaltext .= "( English: ".$value .")";
+                  }
+                  if($language == 'English'){
+                    $finaltext .= $value ." \n ";
+                      $value = $tran->translateText($value,"Japanese");
+                      $finaltext .= "( Japanese: ".$value .")";
+                  }
+                return $finaltext;
+            }
+        }
+
         return $value;
     }
+
 
     public function generatePresignedUrl($filePath)
     {
