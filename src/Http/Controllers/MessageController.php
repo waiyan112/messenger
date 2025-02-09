@@ -85,18 +85,20 @@ class MessageController
      */
     public function store(MessageRequest $request,
                           StoreMessage $storeMessage,
-                          Thread $thread): MessageResource
+                          Thread $thread)
     {
         $this->authorize('create', [
             app(Message::class),
             $thread,
         ]);
 
-        return $storeMessage->execute(
+         $storeMessage->execute(
             $thread,
             $request->validated(),
             $request->ip()
-        )->getJsonResource();
+        );
+    return response()->json(['status' => 'success']);
+
     }
 
     /**
