@@ -344,24 +344,13 @@ class Message extends Model implements Ownerable
 
     public function getBodyAttribute($value)
     {        
-        if(env('translatefeature') == 1){
-            $finaltext = '';
-            
-            if($this->type == 0 && $value !="Deleted Message"){
-                $tran =  new \App\Services\OpenAIService();
-                  $language = $tran->detectLanguage($value);
-                  if($language == 'Japanese'){
-                    $finaltext .= $value ." \n ";
-                      $value = $tran->translateText($value,"English");
-                      $finaltext .= "( English: ".$value .")";
-                  }
-                  if($language == 'English'){
-                    $finaltext .= $value ." \n ";
-                      $value = $tran->translateText($value,"Japanese");
-                      $finaltext .= "( Japanese: ".$value .")";
-                  }
-                return $finaltext;
-            }
+
+        if($this->type == 0 && $value !="Deleted Message"){
+            $data = array(
+                 'original' => array('message' => $value, 'language' => 'English'),
+                 'translate' => array('message' => $value, 'language' => 'Japanese'),
+            );
+            return $data;
         }
 
         return $value;
