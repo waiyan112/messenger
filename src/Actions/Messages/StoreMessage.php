@@ -12,7 +12,6 @@ use RTippin\Messenger\Models\Message;
 use RTippin\Messenger\Models\Thread;
 use RTippin\Messenger\Services\OpenAIService;
 use Throwable;
-use Log;
 class StoreMessage extends NewMessageAction
 {
     /**
@@ -81,11 +80,7 @@ class StoreMessage extends NewMessageAction
             ->process()
             ->finalize();
 
-
-
-            Log::info(Message::MESSAGE);
         if(Message::MESSAGE == 0){
-            Log::info();
             //check language
             $detect_language = $this->openai->detectLanguage($params['message']);
             if($detect_language == 'error'){
