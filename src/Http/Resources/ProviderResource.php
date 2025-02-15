@@ -67,9 +67,9 @@ class ProviderResource extends JsonResource
             'route' => $this->provider->getProviderProfileRoute(),
             'provider_id' => $this->provider->getKey(),
             'provider_alias' => Messenger::findProviderAlias($this->provider) ?: 'ghost',
-            // 'base' => $this->when($this->addBaseModel,
-            //     fn () => $this->provider->withoutRelations()->toArray()
-            // ),
+            'base' => $this->when($this->addBaseModel,
+                fn () => $this->provider->withoutRelations()->toArray()
+            ),
             'options' => $this->when($this->addOptions,
                 fn () => $this->addOptions()
             ),

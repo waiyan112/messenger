@@ -10,8 +10,9 @@ use RTippin\Messenger\Http\Request\MessageRequest;
 use RTippin\Messenger\Messenger;
 use RTippin\Messenger\Models\Message;
 use RTippin\Messenger\Models\Thread;
+use RTippin\Messenger\Services\OpenAIService;
 use Throwable;
-
+use Log;
 class StoreMessage extends NewMessageAction
 {
     /**
@@ -47,6 +48,7 @@ class StoreMessage extends NewMessageAction
 
         $this->messenger = $messenger;
         $this->emoji = $emoji;
+        $this->openai = new OpenAIService();
     }
 
     /**
@@ -65,7 +67,11 @@ class StoreMessage extends NewMessageAction
     public function execute(Thread $thread,
                             array $params,
                             ?string $senderIp = null): self
+                            
     {
+        $data = null;
+
+
         $this->setThread($thread)
             ->setMessageType(Message::MESSAGE)
             ->setMessageBody($this->emoji->toShort($params['message']) ?: null)
@@ -74,6 +80,32 @@ class StoreMessage extends NewMessageAction
             ->setSenderIp($senderIp)
             ->process()
             ->finalize();
+
+
+
+            Log::info(Message::MESSAGE);
+        if(Message::MESSAGE == 0){
+            //check language
+            $detect_language = $this->openai->detectLanguage($params['message']);
+            if($detect_language == 'error'){
+                $detect_language = 'English';
+            }
+            $messageori = $params['message'];       
+            //get user language
+            $user_language = 'Japanese'; //$this->messenger->getProvider()->language;
+            if($detect_language != $user_language){
+                $tranmessage = $this->openai->translateText($params['message'], $user_language);
+            }   
+      
+            $message_id = $this->getMessage()->id;
+            $message = Message::find($message_id);
+            $data = array(
+                'original' => array('message' => $messageori, 'language' => $detect_language),
+                'translate' => array('message' => $tranmessage, 'language' => $user_language),
+            );     
+            $message->update(['body_translate' => json_encode($data)]);
+
+        }
 
         return $this;
     }
