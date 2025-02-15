@@ -85,6 +85,7 @@ class StoreMessage extends NewMessageAction
 
             Log::info(Message::MESSAGE);
         if(Message::MESSAGE == 0){
+            Log::info();
             //check language
             $detect_language = $this->openai->detectLanguage($params['message']);
             if($detect_language == 'error'){
@@ -92,8 +93,14 @@ class StoreMessage extends NewMessageAction
             }
             $messageori = $params['message'];       
             //get user language
-            $user_language = 'Japanese'; //$this->messenger->getProvider()->language;
+            $user_language = $this->messenger->getProvider()->language;
+            if($user_language == null){
+                $user_language = 'English';
+            }
+            $tranmessage = $params['message'];
+            $translate = false;
             if($detect_language != $user_language){
+                $translate = true;
                 $tranmessage = $this->openai->translateText($params['message'], $user_language);
             }   
       
@@ -102,6 +109,7 @@ class StoreMessage extends NewMessageAction
             $data = array(
                 'original' => array('message' => $messageori, 'language' => $detect_language),
                 'translate' => array('message' => $tranmessage, 'language' => $user_language),
+                'translate_status' => $translate
             );     
             $message->update(['body_translate' => json_encode($data)]);
 
