@@ -349,13 +349,12 @@ class Message extends Model implements Ownerable
         return $value;
     }
 
-    public function getTranslateAttribute(){
+    public function getBodyTranslateAttribute($value){
 
-            $data = array(
-                 'original' => array('message' => $this->body, 'language' => 'English'),
-                 'translate' => array('message' => $this->body, 'language' => 'Japanese'),
-            );
-            return $data;
+        if($this->type == 0 && $this->body == 'deleted'){
+            return json_decode($value, true);
+        }
+        return null;
         
     }
 

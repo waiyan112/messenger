@@ -64,7 +64,7 @@ class MessageResource extends JsonResource
             'system_message' => $this->message->isSystemMessage(),
             'from_bot' => $this->message->isFromBot(),
             'body' => MessageTransformer::transform($this->message),
-            'translate' => $this->message->translate, 
+            'body_translate' => $this->message->body_translate,
             'edited' => $this->message->isEdited(),
             'reacted' => $this->message->isReacted(),
             'embeds' => $this->message->showEmbeds(),
