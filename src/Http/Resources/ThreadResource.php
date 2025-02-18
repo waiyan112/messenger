@@ -65,6 +65,7 @@ class ThreadResource extends JsonResource
             'group' => $this->thread->isGroup(),
             'unread' => $this->thread->isUnread(),
             'unread_count' => $this->thread->unreadCount(),
+            'translate_mode' => $this->thread->currentParticipant()->translate_mode ?? null,
             'created_at' => $this->thread->created_at,
             'updated_at' => $this->thread->updated_at,
             // 'options' => [

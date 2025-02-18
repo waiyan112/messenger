@@ -351,7 +351,7 @@ class Message extends Model implements Ownerable
 
     public function getBodyTranslateAttribute($value){
         
-        if($this->type == 0 && $this->body != 'deleted'){
+        if($this->type == 0 && $this->body != 'Deleted Message'){
             return json_decode($value, true);
         }
         return null;
