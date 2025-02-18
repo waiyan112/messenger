@@ -70,7 +70,6 @@ class StoreMessage extends NewMessageAction
     {
         $data = null;
 
-
         $this->setThread($thread)
             ->setMessageType(Message::MESSAGE)
             ->setMessageBody($this->emoji->toShort($params['message']) ?: null)
@@ -87,14 +86,17 @@ class StoreMessage extends NewMessageAction
                 $detect_language = 'English';
             }
             $messageori = $params['message'];       
-            //get user language
-            $user_language = $this->messenger->getProvider()->language;
-            if($user_language == null){
-                $user_language = 'English';
-            }
+            
+            //get other participant language and language_mode
+            $otherParticipant = $thread->participants()
+                ->where('owner_id', '!=', $this->messenger->getProvider()->id)
+                ->first();
+            $user_language = $otherParticipant ? $otherParticipant->owner->language : 'English';
+            $user_language_mode = $otherParticipant ? $otherParticipant->translate_mode : '0';
+           
             $tranmessage = $params['message'];
             $translate = false;
-            if($detect_language != $user_language){
+            if($detect_language != $user_language && $user_language_mode == '1'){
                 $translate = true;
                 $tranmessage = $this->openai->translateText($params['message'], $user_language);
             }   
@@ -104,10 +106,10 @@ class StoreMessage extends NewMessageAction
             $data = array(
                 'original' => array('message' => $messageori, 'language' => $detect_language),
                 'translate' => array('message' => $tranmessage, 'language' => $user_language),
-                'translate_status' => $translate
+                'translate_status' => $translate,
+                'language_mode' => $user_language_mode
             );     
             $message->update(['body_translate' => json_encode($data)]);
-
         }
 
         return $this;
