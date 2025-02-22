@@ -92,11 +92,11 @@ class StoreMessage extends NewMessageAction
                 ->where('owner_id', '!=', $this->messenger->getProvider()->id)
                 ->first();
             $user_language = $otherParticipant ? $otherParticipant->owner->language : 'English';
-            $user_language_mode = $otherParticipant ? $otherParticipant->translate_mode : '0';
+            $user_language_mode = (int) $otherParticipant ? $otherParticipant->translate_mode : '0';
            
             $tranmessage = $params['message'];
             $translate = false;
-            if($detect_language != $user_language && $user_language_mode == '1'){
+            if($detect_language != $user_language && $user_language_mode == 1){
                 $translate = true;
                 $tranmessage = $this->openai->translateText($params['message'], $user_language);
             }   
