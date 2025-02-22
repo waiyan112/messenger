@@ -66,33 +66,22 @@ class StoreMessage extends NewMessageAction
     public function execute(Thread $thread,
                             array $params,
                             ?string $senderIp = null): self
-                            
     {
-        $data = null;
+        // Prepare translation data first
+        $messageData = [
+            'body_translate' => null
+        ];
 
-        $this->setThread($thread)
-            ->setMessageType(Message::MESSAGE)
-            ->setMessageBody($this->emoji->toShort($params['message']) ?: null)
-            ->setMessageOptionalParameters($params)
-            ->setMessageOwner($this->messenger->getProvider())
-            ->setSenderIp($senderIp)
-            ->process()
-            ->finalize();
-
-        if(Message::MESSAGE == 0){
-            //check language
+        if (Message::MESSAGE == 0) {
             $detect_language = $this->openai->detectLanguage($params['message']);
-            if($detect_language == 'error'){
+            if ($detect_language == 'error') {
                 $detect_language = 'English';
             }
-            $messageori = $params['message'];       
             
-            //get other participant language and language_mode
             $otherParticipant = $thread->participants()
                 ->where('owner_id', '!=', $this->messenger->getProvider()->id)
                 ->first();
 
-            // Safely get user language and mode with fallbacks
             $user_language = 'English';
             $user_language_mode = '0';
             
@@ -101,7 +90,6 @@ class StoreMessage extends NewMessageAction
                     $user_language = $otherParticipant->owner->language ?? 'English';
                     $user_language_mode = $otherParticipant->translate_mode ?? '0';
                 } catch (\Throwable $e) {
-                    // Fallback to defaults if any error occurs
                     $user_language = 'English';
                     $user_language_mode = '0';
                 }
@@ -109,21 +97,28 @@ class StoreMessage extends NewMessageAction
            
             $tranmessage = $params['message'];
             $translate = false;
-            if($detect_language != $user_language && $user_language_mode == '1'){
+            
+            if ($detect_language != $user_language && $user_language_mode == '1') {
                 $translate = true;
                 $tranmessage = $this->openai->translateText($params['message'], $user_language);
             }   
       
-            $message_id = $this->getMessage()->id;
-            $message = Message::find($message_id);
-            $data = array(
-                'original' => array('message' => $messageori, 'language' => $detect_language),
-                'translate' => array('message' => $tranmessage, 'language' => $user_language),
+            $messageData['body_translate'] = json_encode([
+                'original' => ['message' => $params['message'], 'language' => $detect_language],
+                'translate' => ['message' => $tranmessage, 'language' => $user_language],
                 'translate_status' => $translate,
                 'language_mode' => $user_language_mode
-            );     
-            $message->update(['body_translate' => json_encode($data)]);
+            ]);
         }
+
+        $this->setThread($thread)
+            ->setMessageType(Message::MESSAGE)
+            ->setMessageBody($this->emoji->toShort($params['message']) ?: null)
+            ->setMessageOptionalParameters(array_merge($params, $messageData))
+            ->setMessageOwner($this->messenger->getProvider())
+            ->setSenderIp($senderIp)
+            ->process()
+            ->finalize();
 
         return $this;
     }
