@@ -42,6 +42,7 @@ abstract class NewMessageAction extends BaseMessengerAction
      * @var string|null
      */
     private ?string $messageBody;
+    private ?string $messageBodyTranslate = null;
 
     /**
      * @var string|null
@@ -117,6 +118,7 @@ abstract class NewMessageAction extends BaseMessengerAction
         $this->messageTemporaryId = $parameters['temporary_id'] ?? null;
 
         $this->messageExtraData = $parameters['extra'] ?? null;
+        $this->messageBodyTranslate = $parameters['body_translate'] ?? null;
 
         $this->setReplyingToMessage($parameters['reply_to_id'] ?? null);
 
@@ -295,6 +297,7 @@ abstract class NewMessageAction extends BaseMessengerAction
                 'owner_id' => $this->messageOwner->getKey(),
                 'owner_type' => $this->messageOwner->getMorphClass(),
                 'body' => $this->messageBody,
+                'body_translate' => $this->messageBodyTranslate,
                 'reply_to_id' => optional($this->replyingTo)->id,
                 'extra' => $this->messageExtraData,
             ])

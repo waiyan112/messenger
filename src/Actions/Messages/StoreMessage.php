@@ -12,6 +12,7 @@ use RTippin\Messenger\Models\Message;
 use RTippin\Messenger\Models\Thread;
 use RTippin\Messenger\Services\OpenAIService;
 use Throwable;
+
 class StoreMessage extends NewMessageAction
 {
     /**
@@ -67,58 +68,57 @@ class StoreMessage extends NewMessageAction
                             array $params,
                             ?string $senderIp = null): self
     {
-        // Prepare translation data first
-        $messageData = [
-            'body_translate' => null
-        ];
-
-        if (Message::MESSAGE == 0) {
-            $detect_language = $this->openai->detectLanguage($params['message']);
-            if ($detect_language == 'error') {
-                $detect_language = 'English';
-            }
-            
-            $otherParticipant = $thread->participants()
-                ->where('owner_id', '!=', $this->messenger->getProvider()->id)
-                ->first();
-
-            $user_language = 'English';
-            $user_language_mode = '0';
-            
-            if ($otherParticipant && $otherParticipant->owner) {
-                try {
-                    $user_language = $otherParticipant->owner->language ?? 'English';
-                    $user_language_mode = $otherParticipant->translate_mode ?? '0';
-                } catch (\Throwable $e) {
-                    $user_language = 'English';
-                    $user_language_mode = '0';
-                }
-            }
-           
-            $tranmessage = $params['message'];
-            $translate = false;
-            
-            if ($detect_language != $user_language && $user_language_mode == '1') {
-                $translate = true;
-                $tranmessage = $this->openai->translateText($params['message'], $user_language);
-            }   
-      
-            $messageData['body_translate'] = json_encode([
-                'original' => ['message' => $params['message'], 'language' => $detect_language],
-                'translate' => ['message' => $tranmessage, 'language' => $user_language],
-                'translate_status' => $translate,
-                'language_mode' => $user_language_mode
-            ]);
+        $detect_language = $this->openai->detectLanguage($params['message']);
+        if ($detect_language == 'error') {
+            $detect_language = 'English';
         }
+        
+        $otherParticipant = $thread->participants()
+            ->where('owner_id', '!=', $this->messenger->getProvider()->id)
+            ->first();
 
+        $user_language = 'English';
+        $user_language_mode = '0';
+        
+        if ($otherParticipant && $otherParticipant->owner) {
+            try {
+                $user_language = $otherParticipant->owner->language ?? 'English';
+                $user_language_mode = $otherParticipant->translate_mode ?? '0';
+            } catch (\Throwable $e) {
+                $user_language = 'English';
+                $user_language_mode = '0';
+            }
+        }
+       
+        $tranmessage = $params['message'];
+        $translate = false;
+
+        if ($detect_language != $user_language && $user_language_mode != '0') {
+            $translate = true;
+            $tranmessage = $this->openai->translateText($params['message'], $user_language);
+        }   
+
+        // Create translation data
+        $translationData = [
+            'original' => ['message' => $params['message'], 'language' => $detect_language],
+            'translate' => ['message' => $tranmessage, 'language' => $user_language],
+            'translate_status' => $translate,
+            'language_mode' => $user_language_mode
+        ];
+        
+        // Add body_translate to the original params
+        $params['body_translate'] = json_encode($translationData);
+
+        // Set the thread and message properties with all params
         $this->setThread($thread)
             ->setMessageType(Message::MESSAGE)
             ->setMessageBody($this->emoji->toShort($params['message']) ?: null)
-            ->setMessageOptionalParameters(array_merge($params, $messageData))
+            ->setMessageOptionalParameters($params)
             ->setMessageOwner($this->messenger->getProvider())
-            ->setSenderIp($senderIp)
-            ->process()
-            ->finalize();
+            ->setSenderIp($senderIp);
+
+        // Process and finalize the message
+        $this->process()->finalize();
 
         return $this;
     }
