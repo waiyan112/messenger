@@ -91,12 +91,25 @@ class StoreMessage extends NewMessageAction
             $otherParticipant = $thread->participants()
                 ->where('owner_id', '!=', $this->messenger->getProvider()->id)
                 ->first();
-            $user_language = $otherParticipant ? $otherParticipant->owner->language : 'English';
-            $user_language_mode = (int) $otherParticipant ? $otherParticipant->translate_mode : '0';
+
+            // Safely get user language and mode with fallbacks
+            $user_language = 'English';
+            $user_language_mode = '0';
+            
+            if ($otherParticipant && $otherParticipant->owner) {
+                try {
+                    $user_language = $otherParticipant->owner->language ?? 'English';
+                    $user_language_mode = $otherParticipant->translate_mode ?? '0';
+                } catch (\Throwable $e) {
+                    // Fallback to defaults if any error occurs
+                    $user_language = 'English';
+                    $user_language_mode = '0';
+                }
+            }
            
             $tranmessage = $params['message'];
             $translate = false;
-            if($detect_language != $user_language && $user_language_mode == 1){
+            if($detect_language != $user_language && $user_language_mode == '1'){
                 $translate = true;
                 $tranmessage = $this->openai->translateText($params['message'], $user_language);
             }   
