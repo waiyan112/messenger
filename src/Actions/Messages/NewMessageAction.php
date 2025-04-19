@@ -168,9 +168,15 @@ abstract class NewMessageAction extends BaseMessengerAction
      */
     protected function finalize(): void
     {
-        $this->generateResource()
-            ->fireBroadcast()
-            ->fireEvents();
+        // Reduce synchronous code by deferring broadcast and event firing
+        // Generate the resource first (required for immediate response)
+        $this->generateResource();
+    
+        // Send broadcasts and fire events asynchronously for better performance
+        dispatch(function() {
+            $this->fireBroadcast()
+                 ->fireEvents();
+        })->afterResponse();
     }
 
     /**

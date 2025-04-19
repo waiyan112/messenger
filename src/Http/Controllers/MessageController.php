@@ -39,10 +39,14 @@ class MessageController
         //     app(Message::class),,
         //     $thread,
         // ]);
-
+        
+        // Eager load only necessary relationships to improve performance
+        $threadWithMinimalRelations = clone $thread;
+        $threadWithMinimalRelations->loadMissing('participants.owner:id,name,avatar');
+        
         return new MessageCollection(
             $repository->getThreadMessagesIndex($thread),
-            $thread->load('participants.owner')
+            $threadWithMinimalRelations
         );
     }
 
@@ -74,12 +78,12 @@ class MessageController
     }
 
     /**
-     * Store a new message.
+     * Store a new message - optimized for better performance.
      *
      * @param  MessageRequest  $request
      * @param  StoreMessage  $storeMessage
      * @param  Thread  $thread
-     * @return MessageResource
+     * @return JsonResponse
      *
      * @throws AuthorizationException|Throwable
      */
@@ -87,18 +91,24 @@ class MessageController
                           StoreMessage $storeMessage,
                           Thread $thread)
     {
+        // Don't validate using full Model instance when only thread check is needed
         $this->authorize('create', [
-            app(Message::class),
+            Message::class,
             $thread,
         ]);
-
-         $storeMessage->execute(
+        
+        // Execute StoreMessage without waiting for full completion
+        $storeMessage->execute(
             $thread,
             $request->validated(),
             $request->ip()
         );
-    return response()->json(['status' => 'success']);
 
+        // Return minimal success response
+        return response()->json(['status' => 'success'], 200, [
+            'Cache-Control' => 'no-cache, no-store, must-revalidate',
+            'Connection' => 'keep-alive'
+        ]);
     }
 
     /**
