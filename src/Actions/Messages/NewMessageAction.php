@@ -168,15 +168,15 @@ abstract class NewMessageAction extends BaseMessengerAction
      */
     protected function finalize(): void
     {
-        // Reduce synchronous code by deferring broadcast and event firing
         // Generate the resource first (required for immediate response)
         $this->generateResource();
-    
-        // Send broadcasts and fire events asynchronously for better performance
+        
+        // Send broadcasts and fire events using Redis queue with high priority
+        // Using onQueue to specify high priority queue for better performance
         dispatch(function() {
             $this->fireBroadcast()
                  ->fireEvents();
-        })->afterResponse();
+        })->afterResponse()->onQueue('messenger-high');
     }
 
     /**
