@@ -71,6 +71,29 @@ class Message extends Model implements Ownerable
     public $cacheTags = ['messenger_messages'];
     public $cachePrefix = 'messages_';
 
+    /**
+     * Invalidate the cache automatically
+     * when a message is created or updated
+     */
+    protected static $flushCacheOnUpdate = true;
+
+    /**
+     * When a message is created/updated/deleted, 
+     * we should also invalidate thread cache
+     */
+    protected static function booted()
+    {
+        // Flush associated tags when a message is saved
+        static::saved(function (Message $message) {
+            static::flushQueryCache(['messenger_messages', "thread_{$message->thread_id}"]);
+        });
+
+        // Flush associated tags when a message is deleted
+        static::deleted(function (Message $message) {
+            static::flushQueryCache(['messenger_messages', "thread_{$message->thread_id}"]);
+        });
+    }
+
     const MESSAGE = 0;
     const IMAGE_MESSAGE = 1;
     const DOCUMENT_MESSAGE = 2;
