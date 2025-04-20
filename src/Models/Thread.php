@@ -18,7 +18,8 @@ use RTippin\Messenger\Facades\Messenger;
 use RTippin\Messenger\Support\Helpers;
 use RTippin\Messenger\Traits\ScopesProvider;
 use RTippin\Messenger\Traits\Uuids;
-//use Rennokki\QueryCache\Traits\QueryCacheable;
+use Rennokki\QueryCache\Traits\QueryCacheable;
+
 /**
  * @mixin Model|\Eloquent
  *
@@ -66,10 +67,12 @@ class Thread extends Model implements HasPresenceChannel
     use HasFactory,
         ScopesProvider,
         SoftDeletes,
-   //     QueryCacheable,
+        QueryCacheable,
         Uuids;
 
-//    public $cacheFor = 3600;
+    public $cacheFor = 1800; // Cache for 30 minutes
+    public $cacheTags = ['messenger_threads'];
+    public $cachePrefix = 'threads_';
 
     const PRIVATE = 1;
     const GROUP = 2;

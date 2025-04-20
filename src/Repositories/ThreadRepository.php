@@ -38,6 +38,7 @@ class ThreadRepository
                 'activeCall.participants.owner',
             ])
             ->limit($this->messenger->getThreadsIndexCount())
+            ->cacheFor(now()->addMinutes(5))  // Cache for 5 minutes
             ->get();
     }
 
@@ -57,6 +58,7 @@ class ThreadRepository
             ->where('threads.updated_at', '<=', Helpers::precisionTime($thread->updated_at))
             ->where('threads.id', '!=', $thread->id)
             ->limit($this->messenger->getThreadsPageCount())
+            ->cacheFor(now()->addMinutes(5))  // Cache for 5 minutes
             ->get();
     }
 
@@ -73,7 +75,9 @@ class ThreadRepository
      */
     public function getProviderThreadsWithActiveCalls(): Collection
     {
-        return $this->getProviderThreadsWithActiveCallsBuilder()->get();
+        return $this->getProviderThreadsWithActiveCallsBuilder()
+            ->cacheFor(now()->addMinute())  // Cache for 1 minute since active calls may change frequently
+            ->get();
     }
 
     /**
@@ -83,6 +87,7 @@ class ThreadRepository
     {
         return Thread::hasProvider($this->messenger->getProvider())
             ->oldest('updated_at')
+            ->cacheFor(now()->addHour())  // Cache for longer since this rarely changes
             ->first();
     }
 

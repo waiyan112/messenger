@@ -23,6 +23,7 @@ use RTippin\Messenger\Traits\Uuids;
 use Aws\S3\S3Client;
 use Illuminate\Support\Facades\Storage;
 use Aws\Exception\AwsException;
+use Rennokki\QueryCache\Traits\QueryCacheable;
 
 
 /**
@@ -63,10 +64,12 @@ class Message extends Model implements Ownerable
         HasOwner,
         ScopesProvider,
         SoftDeletes,
+        QueryCacheable,
         Uuids;
 
-
-
+    public $cacheFor = 1800; // Cache for 30 minutes
+    public $cacheTags = ['messenger_messages'];
+    public $cachePrefix = 'messages_';
 
     const MESSAGE = 0;
     const IMAGE_MESSAGE = 1;
