@@ -15,6 +15,7 @@ use RTippin\Messenger\Http\Resources\MessageResource;
 use RTippin\Messenger\Models\Bot;
 use RTippin\Messenger\Models\Message;
 use Throwable;
+use Illuminate\Support\Facades\Log;
 
 abstract class NewMessageAction extends BaseMessengerAction
 {
@@ -169,13 +170,45 @@ abstract class NewMessageAction extends BaseMessengerAction
     protected function finalize(): void
     {
         // Generate the resource first (required for immediate response)
-        $this->generateResource();
+        $this->generateResource();      
+
         
-        // Send broadcasts and fire events using Redis queue with high priority
-        // Using onQueue to specify high priority queue for better performance
-        dispatch(function() {
-            $this->fireBroadcast()
-                 ->fireEvents();
+        // Extract only necessary data to avoid serializing the entire object
+        $messageId = $this->getMessage()->id;
+        $threadId = $this->getThread()->id;
+        $resource = $this->getJsonResource()->resolve();
+        
+        // Send broadcasts and fire events without serializing the entire object
+        dispatch(function() use ($messageId, $threadId, $resource) {            
+            try {
+                // Get fresh instances from the database instead of serializing
+                $message = Message::findOrFail($messageId);
+                $thread = $message->thread;
+                
+                // Get broadcaster instance
+                $broadcaster = app(BroadcastDriver::class);               
+
+                $broadcaster
+                    ->toAllInThread($thread)
+                    ->with($resource)
+                    ->broadcast(NewMessageBroadcast::class);               
+
+                
+                // Fire events
+                event(new NewMessageEvent(
+                    $message,
+                    $thread,
+                    $thread->isGroup() && $message->notFromBot() && $message->notSystemMessage() && $thread->isAdmin(),
+                    request()->ip()
+                ));                
+
+            } catch (\Exception $e) {
+                Log::error("NewMessageAction: Error in broadcast/event dispatch: {$e->getMessage()}", [
+                    'message_id' => $messageId,
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+            }
         })->afterResponse()->onQueue('messenger-high');
     }
 
@@ -201,13 +234,22 @@ abstract class NewMessageAction extends BaseMessengerAction
      */
     private function fireBroadcast(): self
     {
+        
         if ($this->shouldFireBroadcast()) {
-            $this->broadcaster
-                ->toAllInThread($this->getThread())
-                ->with($this->getJsonResource()->resolve())
-                ->broadcast(NewMessageBroadcast::class);
-        }
+            try {
+                $this->broadcaster
+                    ->toAllInThread($this->getThread())
+                    ->with($this->getJsonResource()->resolve())
+                    ->broadcast(NewMessageBroadcast::class);                   
 
+            } catch (\Exception $e) {
+                Log::error('NewMessageAction: Broadcasting failed', [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+            }
+        }
+        
         return $this;
     }
 
@@ -215,14 +257,22 @@ abstract class NewMessageAction extends BaseMessengerAction
      * @return void
      */
     private function fireEvents(): void
-    {
+    {        
         if ($this->shouldFireEvents()) {
-            $this->dispatcher->dispatch(new NewMessageEvent(
-                $this->getMessage(true),
-                $this->getThread(true),
-                $this->isGroupAdmin(),
-                $this->senderIp
-            ));
+            try {
+                $this->dispatcher->dispatch(new NewMessageEvent(
+                    $this->getMessage(true),
+                    $this->getThread(true),
+                    $this->isGroupAdmin(),
+                    $this->senderIp
+                ));
+                
+            } catch (\Exception $e) {
+                Log::error('NewMessageAction: Event dispatching failed', [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+            }
         }
     }
 
