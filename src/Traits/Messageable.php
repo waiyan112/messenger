@@ -104,14 +104,9 @@ trait Messageable
      */
     public function getProviderAvatarRoute(string $size = 'sm'): ?string
     {
-        return Helpers::route('assets.messenger.provider.avatar.render',
-            [
-                'alias' => Messenger::findProviderAlias($this),
-                'id' => $this->getKey(),
-                'size' => $size,
-                'image' => $this->{$this->getProviderAvatarColumn()} ?: 'default.png',
-            ]
-        );
+        // Use the new format: {url}/{user_id}/avatar
+        $baseUrl = config('app.url', 'https://api.messenger.ooak.jp');
+        return rtrim($baseUrl, '/') . '/api/v1/' . $this->getKey() . '/avatar';
     }
 
     /**

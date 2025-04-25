@@ -492,13 +492,8 @@ class Thread extends Model implements HasPresenceChannel
      */
     public function getThreadAvatarRoute(string $size = 'sm'): ?string
     {
-        return Helpers::route('assets.messenger.threads.avatar.render',
-            [
-                'thread' => $this->id,
-                'size' => $size,
-                'image' => $this->image ?: 'default.png',
-            ]
-        );
+        $baseUrl = config('app.url', 'https://api.messenger.ooak.jp');
+        return rtrim($baseUrl, '/') . '/api/v1/' . $this->id . '/avatar';
     }
 
     /**
@@ -513,11 +508,14 @@ class Thread extends Model implements HasPresenceChannel
                 'lg' => $this->recipient()->owner->getProviderAvatarRoute('lg'),
             ];
         }
-
+        
+        $baseUrl = config('app.url', 'https://api.messenger.ooak.jp');
+        $avatarUrl = rtrim($baseUrl, '/') . '/api/v1/' . $this->id . '/avatar';
+        
         return [
-            'sm' => 'https://gravatar.com/avatar/7047eabc6b127aa363e66adcea596bbe?s=400&d=robohash&r=x' ,//$this->getThreadAvatarRoute(),
-            'md' => 'https://gravatar.com/avatar/7047eabc6b127aa363e66adcea596bbe?s=400&d=robohash&r=x',//$this->getThreadAvatarRoute('md'),
-            'lg' => 'https://gravatar.com/avatar/7047eabc6b127aa363e66adcea596bbe?s=400&d=robohash&r=x'//$this->getThreadAvatarRoute('lg'),
+            'sm' => $avatarUrl,
+            'md' => $avatarUrl,
+            'lg' => $avatarUrl,
         ];
     }
 

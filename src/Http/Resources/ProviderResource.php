@@ -95,20 +95,16 @@ class ProviderResource extends JsonResource
      */
     private function addAvatar(): array
     {
+        $baseUrl = config('app.url', 'https://api.messenger.ooak.jp');
+        $userId = $this->provider->getKey();
+        $avatarUrl = rtrim($baseUrl, '/') . '/api/v1/' . $userId . '/avatar';
+        
         return [
-            // 'avatar' => [
-            //     'sm' => $this->provider->getProviderAvatarRoute('sm'),
-            //     'md' => $this->provider->getProviderAvatarRoute('md'),
-            //     'lg' => $this->provider->getProviderAvatarRoute('lg'),
-            // ],
-
             'avatar' => [
-                'sm' => 'https://gravatar.com/avatar/7047eabc6b127aa363e66adcea596bbe?s=400&d=robohash&r=x' ,//$this->getThreadAvatarRoute(),
-                'md' => 'https://gravatar.com/avatar/7047eabc6b127aa363e66adcea596bbe?s=400&d=robohash&r=x',//$this->getThreadAvatarRoute('md'),
-                'lg' => 'https://gravatar.com/avatar/7047eabc6b127aa363e66adcea596bbe?s=400&d=robohash&r=x'//$this->getThreadAvatarRoute('lg'),
+                'sm' => $avatarUrl,
+                'md' => $avatarUrl,
+                'lg' => $avatarUrl,
             ],
-
-
         ];
     }
 
